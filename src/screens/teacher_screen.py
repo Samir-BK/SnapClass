@@ -5,7 +5,6 @@ from src.database.db import teacher_login, check_teacher_exist, create_teacher
 def teacher_screen():
     style_base_layout()
     style_bg_dashboard()
-    header_dashboard()
 
     if "teacher_data" in st.session_state:
         teacher_dashboard()
@@ -83,6 +82,7 @@ def register_teacher(teacher_username, teacher_name, teacher_pass, teacher_pass_
         create_teacher(teacher_username, teacher_pass, teacher_name)
         return True, "Successfully Registered as a Teacher, Login Now!"
     except Exception as e:
+        print(e)
         return False, "Unexpected Error!"
 
 def teacher_screen_register():
