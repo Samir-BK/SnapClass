@@ -5,7 +5,7 @@ def hash_pass(pwd):
     return bcrypt.hashpw(pwd.encode(), bcrypt.gensalt()).decode()
 
 def check_pass(pwd, hased):
-    return bcrypt.checkpw(pwd.encode(), hased.code())
+    return bcrypt.checkpw(pwd.encode(), hased.encode())
 
 def check_teacher_exist(username):
     # check for unique usename, returns false when username is already taken
