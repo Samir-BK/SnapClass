@@ -52,3 +52,22 @@ def teacher_screen_login():
     st.header('Login using password', text_alignment='center')
     st.space()
     st.space()
+
+    teacher_username = st.text_input("Enter username", placeholder='ananyaroy')
+    teacher_pass = st.text_input("Enter password", type='password', placeholder="Enter password")
+
+    st.divider()
+
+    btnc1, btnc2 = st.columns(2)
+
+    if st.button('Login', icon=':material/passkey:', shortcut='control+enter', width='stretch'):
+        if login_teacher(teacher_username, teacher_pass):
+            st.toast("welcome back!", icon="👋")
+            import time
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.error("Invalid username and password combination.")
+
+    if st.button('Register Instead', type="primary", icon=':material/passkey:', width='stretch'):
+            st.session_state.teacher_login_type = 'register'
