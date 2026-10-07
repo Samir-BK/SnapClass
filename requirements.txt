@@ -9,6 +9,10 @@ dlib-bin
 git+https://github.com/ageitgey/face_recognition_models
 setuptools<70.0.0
 
+# Voice Recognition
+librosa
+resemblyzer
+
 #Database
 supabase
 bcrypt
@@ -21,3 +25,4 @@ pillow
 
 # Frontend
 streamlit
+
