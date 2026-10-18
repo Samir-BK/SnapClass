@@ -1,7 +1,7 @@
 import streamlit as st
 from src.components.header import header_dashboard
 from src.ui.base_layout import style_base_layout, style_bg_dashboard
-from src.database.db import teacher_login, check_teacher_exist, create_teacher, get_all_students
+from src.database.db import teacher_login, check_teacher_exist, create_teacher, get_all_students, create_student
 from PIL import Image
 import numpy as np
 from src.pipeplines.face_pipeline import predict_attendance, get_face_embeddings, trian_classifier
@@ -47,7 +47,7 @@ def student_screen():
                 st.warning("Multiple faces found!")
             else:
                 if detected:
-                    student_id = list(detected.keys()[0])
+                    student_id = next(iter(detected))
                     all_students = get_all_students()
                     student = next((s for s in all_students if s["student_id"] == student_id), None)
 
@@ -59,9 +59,9 @@ def student_screen():
                         time.sleep(1)
                         st.rerun()
 
-                    else:
-                        st.info("Face not recogoinized! You might be a new student!")
-                        show_registration = True
+                else:
+                    st.info("Face not recogoinized! You might be a new student!")
+                    show_registration = True
     if show_registration:
         with st.container(border=True):
             st.header("Register new profile")
@@ -73,7 +73,7 @@ def student_screen():
             audio_data = None
 
             try:
-                audio_data = st.audio("Record a short pharse like I am present, My name is Samir.")
+                audio_data = st.audio_input("Record a short pharse like I am present, My name is Samir.")
             except Exception:
                 st.error("Audio Data failed!")
 
@@ -83,12 +83,12 @@ def student_screen():
                         img = np.array(Image.open(photo_source))
                         encodings = get_face_embeddings(img)
                         if encodings:
-                            face_emb = encodings[0].toList()
+                            face_emb = encodings[0].tolist()
 
                             voice_emb = None
 
-                            if audio_data:
-                                voice_emb = get_voice_embedding(audio_data.read())
+                            if audio_data is not None:
+                                voice_emb = get_voice_embedding(audio_data.getvalue())
                             response_data = create_student(new_name, face_embedding = face_emb, voice_embedding = voice_emb)
 
                             if response_data:
@@ -103,3 +103,10 @@ def student_screen():
                                 st.error("Couldn't capture your facial features for registration.")   
                 else:
                     st.error("Please enter your name first")
+
+
+
+
+
+
+
