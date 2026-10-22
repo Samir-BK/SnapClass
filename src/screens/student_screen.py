@@ -67,7 +67,7 @@ def student_dashboard():
                     icon=':material/delete_forever:',
                     key=f"unenroll_{sid}",
                 ):
-                    unenroll_student_to_subject(student_id, sid)
+                    unenroll_student_to_subject(sid, student_id)
                     st.toast(f'Unenrolled from {sub['name']} successfully!')
                     st.rerun()
 
@@ -175,7 +175,6 @@ def student_screen():
                                 st.error("Couldn't capture your facial features for registration.")   
                 else:
                     st.error("Please enter your name first")
-
 
 
 

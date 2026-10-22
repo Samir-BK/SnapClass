@@ -114,7 +114,7 @@ def enroll_student_by_code(subject_code, student_id):
 
 def unenroll_student_to_subject(subject_id, student_id):
     _require_current_student(student_id)
-    response = create_subject_client().table("subject_students").delete().eq("subject", subject_id).eq("student_id", student_id).execute()
+    response = create_subject_client().table("subject_students").delete().eq("subject_id", subject_id).eq("student_id", student_id).execute()
     return response.data
 
 def get_student_subjects(student_id):
