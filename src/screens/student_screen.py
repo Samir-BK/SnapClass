@@ -8,15 +8,30 @@ from src.pipeplines.face_pipeline import predict_attendance, get_face_embeddings
 from src.pipeplines.voice_pipeline import get_voice_embedding
 import time
 
-# def student_dashboard():
+def student_dashboard():
+    student_data = st.session_state.student_data
+    student_id = student_data["student_id"]
 
-    # if "teacher_data" in st.session_state:
-    #     student()
-    # elif "teacher_login_type" not in st.session_state or st.session_state.teacher_login_type=="login":
-    #     student()
-    # elif st.session_state.teacher_login_type == "register":
-    #     student()
+    c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
+    with c1:
+        header_dashboard()
+    with c2:
+        st.subheader(f"""Welcome, {student_data['name']} """)
+        if st.button("Logout", type='secondary', key='loginbackbtn', shortcut="control+backspace"):
+            st.session_state['is_logged_in'] = False
+            del st.session_state.student_data 
+            st.rerun()
+    st.space()
 
+    c1, c2 =st.columns(2)
+    with c1:
+        st.header('Your Enrolled Subjects')
+    with c2:
+        if st.button('Enroll in Subject', type='primary', width='stretch'):
+            enroll_dialog()
+
+
+    st.divider()
 def student_screen():
     style_bg_dashboard()
     style_base_layout()
