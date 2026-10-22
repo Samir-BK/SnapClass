@@ -1,11 +1,13 @@
 import streamlit as st
 import io
 import segno
+from urllib.parse import quote, urlsplit
 
 @st.dialog("Share Class Link")
 def share_subject_dialog(subject_name, subject_code):
-    app_domain = "http://localhost:8501/"
-    join_url = f"{app_domain}/join-code={subject_code}"
+    app_url = urlsplit(st.context.url)
+    app_domain = f"{app_url.scheme}://{app_url.netloc}"
+    join_url = f"{app_domain}/?join-code={quote(str(subject_code))}"
 
     st.header("Scan to join")
 
