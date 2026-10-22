@@ -45,6 +45,16 @@ def _require_current_teacher(teacher_id):
     ):
         raise PermissionError("You are not authorized to access subjects for this teacher.")
 
+def _require_current_student(student_id):
+    current_student = st.session_state.get("student_data")
+    current_student_id = current_student.get("student_id") if current_student else None
+    if (
+        current_student_id is None
+        or student_id is None
+        or str(current_student_id) != str(student_id)
+    ):
+        raise PermissionError("You are not authorized to access enrollment for this student.")
+
 def create_subject(sub_id, sub_name, section, teacher_id):
     _require_current_teacher(teacher_id)
     data = {"subject_code": sub_id, "name": sub_name, "section": section, "teacher_id": teacher_id}
@@ -68,18 +78,51 @@ def get_teacher_subjects(teacher_id):
     return subjects
 
 def enroll_student_to_subject(subject_id, student_id):
-    data = {"subject": subject_id, "student_id": student_id}
-    response = supabase.table("subject_students").insert(data).execute()
+    _require_current_student(student_id)
+    client = create_subject_client()
+    check = (
+        client.table("subject_students")
+        .select("student_id")
+        .eq("subject_id", subject_id)
+        .eq("student_id", student_id)
+        .limit(1)
+        .execute()
+    )
+    if check.data:
+        raise ValueError("You are already enrolled in this subject.")
+
+    data = {"subject_id": subject_id, "student_id": student_id}
+    response = client.table("subject_students").insert(data).execute()
     return response.data
 
+def enroll_student_by_code(subject_code, student_id):
+    _require_current_student(student_id)
+    client = create_subject_client()
+    response = (
+        client.table("subjects")
+        .select("subject_id, name, subject_code, section")
+        .eq("subject_code", subject_code.strip())
+        .limit(1)
+        .execute()
+    )
+    if not response.data:
+        raise ValueError("No subject was found with that code.")
+
+    subject = response.data[0]
+    enroll_student_to_subject(subject["subject_id"], student_id)
+    return subject
+
 def unenroll_student_to_subject(subject_id, student_id):
-    response = supabase.table("subject_students").delete().eq("subject", subject_id).eq("student_id", student_id).execute()
+    _require_current_student(student_id)
+    response = create_subject_client().table("subject_students").delete().eq("subject", subject_id).eq("student_id", student_id).execute()
     return response.data
 
 def get_student_subjects(student_id):
-    response = supabase.table("subject_students").select("*, subjects(*)").eq("student_id", student_id).execute()
+    _require_current_student(student_id)
+    response = create_subject_client().table("subject_students").select("*, subjects(*)").eq("student_id", student_id).execute()
     return response.data
 
 def get_student_attendance(student_id):
-    response = supabase.table("attendence_log").select("*, subjects(*)").eq("student_id", student_id).execute()
+    _require_current_student(student_id)
+    response = create_subject_client().table("attendence_logs").select("*, subjects(*)").eq("student_id", student_id).execute()
     return response.data
