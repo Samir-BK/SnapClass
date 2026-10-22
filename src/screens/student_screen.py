@@ -2,6 +2,7 @@ import streamlit as st
 from src.components.header import header_dashboard
 from src.ui.base_layout import style_base_layout, style_bg_dashboard
 from src.database.db import teacher_login, check_teacher_exist, create_teacher, get_all_students, create_student
+from src.components.dialog_enroll import enroll_dialog
 from PIL import Image
 import numpy as np
 from src.pipeplines.face_pipeline import predict_attendance, get_face_embeddings, trian_classifier
