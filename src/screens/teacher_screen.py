@@ -50,7 +50,21 @@ def teacher_dashboard():
             st.session_state.current_teacher_tab = 'attendance_records'
             st.rerun()
 
+    st.divider()
 
+    if st.session_state.current_teacher_tab == "take_attendance":
+        teacher_tab_take_attendance()
+    if st.session_state.current_teacher_tab == "manage_subjects":
+        teacher_tab_manage_subjects()
+    if st.session_state.current_teacher_tab == "attendance_records":
+        teacher_tab_attendance_records()
+
+def teacher_tab_take_attendance():
+    st.header("Take AI Attendance")
+def teacher_tab_manage_subjects():
+    st.header("Manage Subjects")
+def teacher_tab_attendance_records():
+    st.header("Attendance Records")
 
 def login_teacher(username, password):
     if not username or not password:
