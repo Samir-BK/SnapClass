@@ -66,3 +66,8 @@ def get_teacher_subjects(teacher_id):
         sub.pop('attendence_logs', None)
 
     return subjects
+
+def enroll_student_to_subject(subject, student_id):
+    data = {"subject": subject, "student_id": student_id}
+    response = supabase.table("subject_students").insert(data).execute()
+    return response.data
