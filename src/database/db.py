@@ -1,4 +1,5 @@
-from src.database.config import supabase
+import streamlit as st
+from src.database.config import create_subject_client, supabase
 import bcrypt # for hashing password
 
 def hash_pass(pwd):
@@ -34,23 +35,34 @@ def create_student(new_name, face_embedding = None, voice_embedding = None):
     response = supabase.table("students").insert(data).execute()
     return response.data
 
+def _require_current_teacher(teacher_id):
+    current_teacher = st.session_state.get("teacher_data")
+    current_teacher_id = current_teacher.get("teacher_id") if current_teacher else None
+    if (
+        current_teacher_id is None
+        or teacher_id is None
+        or str(current_teacher_id) != str(teacher_id)
+    ):
+        raise PermissionError("You are not authorized to access subjects for this teacher.")
+
 def create_subject(sub_id, sub_name, section, teacher_id):
-    data = {"subject_code": sub_id, "subject_name": sub_name, "section": section, "teacher_id": teacher_id}
-    response = supabase.table("subjects").insert(data).execute()
+    _require_current_teacher(teacher_id)
+    data = {"subject_code": sub_id, "name": sub_name, "section": section, "teacher_id": teacher_id}
+    response = create_subject_client().table("subjects").insert(data).execute()
     return response.data
 
 def get_teacher_subjects(teacher_id):
-    response = supabase.table("subjects").select("*, subject_students(count), attendence_logs(timestamp)").eq("teacher_id", teacher_id).execute()
+    _require_current_teacher(teacher_id)
+    response = create_subject_client().table("subjects").select("*, subject_students(count), attendence_logs(timestamp)").eq("teacher_id", teacher_id).execute()
     subjects = response.data
 
     for sub in subjects:
         sub['total_students'] = sub.get("subject_students", [{}])[0].get('count', 0) if sub.get('subject_students') else 0
-        attendance = sub.get('attendance_logs', [])
+        attendance = sub.get('attendence_logs', [])
         unique_sessions = len(set(log['timestamp'] for log in attendance))
         sub['total_classes'] = unique_sessions
 
-
-        sub.pop('subject_student', None)
-        sub.pop('attendance_logs', None)
+        sub.pop('subject_students', None)
+        sub.pop('attendence_logs', None)
 
     return subjects

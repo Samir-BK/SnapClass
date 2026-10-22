@@ -65,7 +65,7 @@ def teacher_dashboard():
 def teacher_tab_take_attendance():
     st.header("Take AI Attendance")
 def teacher_tab_manage_subjects():
-    teacher_id = st.session_state.teacher_data[teacher_id]
+    teacher_id = st.session_state.teacher_data["teacher_id"]
     col1, col2   = st.columns(2);
     with col1:
         st.header("Manage Subjects", width="stretch")
@@ -81,18 +81,19 @@ def teacher_tab_manage_subjects():
                 ("🫂", "Students", sub['total_students']),
                 ("🕰️", "Classes", sub['total_classes']),
             ]
-        def share_btn():
-            if st.button(f"Share code: {sub['name']}", key=f"share_{sub['subject_code']}", icon=":material/share:" ):
-                share_subject_dialog(sub['name'], sub['subject_code'])
-            st.space()
 
-        subject_card(
-            name = sub['name'],
-            code = sub['subject_code'],
-            section = sub['section'],
-            stats=stats,
-            footer_callback=share_btn
-        )
+            def share_btn(name=sub['name'], code=sub['subject_code']):
+                if st.button(f"Share code: {name}", key=f"share_{code}", icon=":material/share:"):
+                    share_subject_dialog(name, code)
+                st.space()
+
+            subject_card(
+                name=sub['name'],
+                code=sub['subject_code'],
+                section=sub['section'],
+                stats=stats,
+                footer_callback=share_btn
+            )
     else:
         st.info("NO SUBJECTS FOUND. CREATE ONE ABOVE")
 
