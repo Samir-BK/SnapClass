@@ -1,7 +1,8 @@
 import streamlit as st
 from src.components.header import header_dashboard
 from src.ui.base_layout import style_base_layout, style_bg_dashboard
-from src.database.db import teacher_login, check_teacher_exist, create_teacher
+from src.database.db import teacher_login, check_teacher_exist, create_teacher, get_teacher_subjects
+from src.components.dialog_create_subjects import create_subject_dailog
 def teacher_screen():
     style_base_layout()
     style_bg_dashboard()
