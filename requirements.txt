@@ -1,3 +1,6 @@
+# Frontend
+streamlit
+
 # Utilities
 
 numpy
@@ -23,6 +26,5 @@ segno
 #Image Preprocessing
 pillow
 
-# Frontend
-streamlit
+
 
