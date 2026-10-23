@@ -153,9 +153,70 @@ def get_student_attendance(student_id):
     return response.data
 
 def create_attendance(logs):
-    response = supabase.table("attendence_logs").insert(logs).execute()
+    teacher = st.session_state.get("teacher_data")
+    teacher_id = teacher.get("teacher_id") if teacher else None
+    _require_current_teacher(teacher_id)
+
+    if not logs:
+        raise ValueError("There are no attendance records to save.")
+
+    client = create_subject_client()
+    subject_ids = {log["subject_id"] for log in logs}
+    student_ids = {log["student_id"] for log in logs}
+
+    subjects = (
+        client.table("subjects")
+        .select("subject_id")
+        .eq("teacher_id", teacher_id)
+        .in_("subject_id", list(subject_ids))
+        .execute()
+        .data
+    )
+    owned_subject_ids = {subject["subject_id"] for subject in subjects}
+    if owned_subject_ids != subject_ids:
+        raise PermissionError("Attendance can only be saved for your own subjects.")
+
+    enrollments = (
+        client.table("subject_students")
+        .select("subject_id, student_id")
+        .in_("subject_id", list(subject_ids))
+        .in_("student_id", list(student_ids))
+        .execute()
+        .data
+    )
+    enrolled_pairs = {
+        (enrollment["subject_id"], enrollment["student_id"])
+        for enrollment in enrollments
+    }
+    if any((log["subject_id"], log["student_id"]) not in enrolled_pairs for log in logs):
+        raise ValueError("Attendance includes a student not enrolled in the subject.")
+
+    response = client.table("attendence_logs").insert(logs).execute()
     return response.data
 
 def get_attendance_for_teacher(teacher_id):
-    response = supabase.table('attendance_logs').select("*, subjects!inner(*)").eq('subjects.teacher_id', teacher_id).execute()
-    return response.data
+    _require_current_teacher(teacher_id)
+    client = create_subject_client()
+    subjects = (
+        client.table("subjects")
+        .select("subject_id, name, subject_code")
+        .eq("teacher_id", teacher_id)
+        .execute()
+        .data
+    )
+    if not subjects:
+        return []
+
+    subjects_by_id = {str(subject["subject_id"]): subject for subject in subjects}
+    response = (
+        client.table("attendence_logs")
+        .select("*")
+        .in_("subject_id", [subject["subject_id"] for subject in subjects])
+        .order("timestamp", desc=True)
+        .execute()
+    )
+    records = response.data
+    for record in records:
+        record["subjects"] = subjects_by_id.get(str(record["subject_id"]))
+
+    return records
