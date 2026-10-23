@@ -1,6 +1,5 @@
 import streamlit as st
-
-
+from src.database.db import create_attendance
 
 def show_attendance_result(df, logs):
     st.write("Please review attendance before confirming.")
@@ -23,9 +22,9 @@ def show_attendance_result(df, logs):
                 st.session_state.voice_attendance_results = None
                 st.rerun()
             except Exception as e:
-                st.error('Sync failed!')
+                st.error(f"Attendance could not be saved: {e}")
 
 
-st.dialog("Attendance Reports")
+@st.dialog("Attendance Reports")
 def attendance_result_dialog(df, logs):
     show_attendance_result(df, logs)
