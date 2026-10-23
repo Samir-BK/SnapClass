@@ -126,3 +126,7 @@ def get_student_attendance(student_id):
     _require_current_student(student_id)
     response = create_subject_client().table("attendence_logs").select("*, subjects(*)").eq("student_id", student_id).execute()
     return response.data
+
+def create_attendance(logs):
+    response = supabase.table("attendence_logs").insert(logs).execute()
+    return response.data
