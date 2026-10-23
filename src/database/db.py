@@ -77,6 +77,31 @@ def get_teacher_subjects(teacher_id):
 
     return subjects
 
+def get_subject_enrolled_students(subject_id):
+    teacher = st.session_state.get("teacher_data")
+    teacher_id = teacher.get("teacher_id") if teacher else None
+    _require_current_teacher(teacher_id)
+
+    client = create_subject_client()
+    subject_response = (
+        client.table("subjects")
+        .select("subject_id")
+        .eq("subject_id", subject_id)
+        .eq("teacher_id", teacher_id)
+        .limit(1)
+        .execute()
+    )
+    if not subject_response.data:
+        raise PermissionError("You are not authorized to view enrollment for this subject.")
+
+    response = (
+        client.table("subject_students")
+        .select("*, students(*)")
+        .eq("subject_id", subject_id)
+        .execute()
+    )
+    return response.data
+
 def enroll_student_to_subject(subject_id, student_id):
     _require_current_student(student_id)
     client = create_subject_client()

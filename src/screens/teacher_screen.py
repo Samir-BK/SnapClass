@@ -1,7 +1,7 @@
 import streamlit as st
 from src.components.header import header_dashboard
 from src.ui.base_layout import style_base_layout, style_bg_dashboard
-from src.database.db import teacher_login, check_teacher_exist, create_teacher, get_teacher_subjects
+from src.database.db import teacher_login, check_teacher_exist, create_teacher, get_teacher_subjects, get_subject_enrolled_students
 from src.components.dialog_create_subjects import create_subject_dailog
 from src.components.dailog_attendance_log import attendance_result_dialog
 from src.components.subject_card import subject_card
@@ -9,7 +9,6 @@ from src.components.dialog_share_subject import share_subject_dialog
 from src.components.dailog_voice_attendance import voice_attendance_dialog
 from src.components.dialog_add_photo import add_photos
 from src.pipeplines.face_pipeline import predict_attendance
-from src.database.config import supabase
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -127,8 +126,7 @@ def teacher_tab_take_attendance():
 
                                 all_detected_ids.setdefault(student_id, []).append(f"Photo {idx + 1}")
 
-                    enrolled_res = supabase.table("subject_students").select("*, students(*)").eq("subject_id", selected_subject_id).execute()
-                    enrolled_students = enrolled_res.data
+                    enrolled_students = get_subject_enrolled_students(selected_subject_id)
 
                     if not enrolled_students:
                         st.warning("No student enrolled in this course!")
